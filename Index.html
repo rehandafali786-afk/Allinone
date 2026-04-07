@@ -1,1 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All-in-One Tool</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --border: #1f2937;
+      --danger: #ef4444;
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background: linear-gradient(145deg, #020617, #0b1224 35%, #091c19);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: min(1100px, 100%);
+      background: rgba(2, 6, 23, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    h1 { margin: 0; font-size: 1.25rem; }
+
+    .subtitle { color: var(--muted); font-size: 0.9rem; }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #0b1224;
+    }
+
+    .tab {
+      border: 1px solid var(--border);
+      background: #111827;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .tab.active {
+      background: #134e4a;
+      border-color: #0f766e;
+      color: #ccfbf1;
+    }
+
+    .content {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #0b1224;
+    }
+
+    .panel h2 { margin-top: 0; font-size: 1rem; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    input, select, button, textarea {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #111827;
+      color: var(--text);
+      padding: 10px;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      background: #14532d;
+      border-color: #166534;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    button.danger {
+      background: #7f1d1d;
+      border-color: #991b1b;
+    }
+
+    .hidden { display: none; }
+
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #111827;
+      border: 1px dashed #334155;
+      min-height: 42px;
+      white-space: pre-wrap;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #111827;
+    }
+
+    .todo-item.done span {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .todo-item span { flex: 1; }
+
+    .clock {
+      font-size: 2rem;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      margin: 8px 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>All-in-One Tool</h1>
+        <div class="subtitle">Calculator • Unit Converter • Notes • To-Do • Timer</div>
+      </div>
+      <div class="subtitle" id="dateNow"></div>
+    </header>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <section class="content">
+      <article class="panel" data-tool="calculator">
+        <h2>Calculator</h2>
+        <div class="row">
+          <input id="calcExpr" placeholder="Example: (20 + 5) * 2" />
+          <button id="calcBtn">Calculate</button>
+        </div>
+        <div class="result" id="calcResult">Enter an expression and press Calculate.</div>
+      </article>
+
+      <article class="panel hidden" data-tool="converter">
+        <h2>Unit Converter</h2>
+        <div class="row">
+          <input id="convInput" type="number" placeholder="Value" />
+          <select id="convType">
+            <option value="km-mi">Kilometers → Miles</option>
+            <option value="mi-km">Miles → Kilometers</option>
+            <option value="c-f">Celsius → Fahrenheit</option>
+            <option value="f-c">Fahrenheit → Celsius</option>
+          </select>
+        </div>
+        <button id="convBtn">Convert</button>
+        <div class="result" id="convResult">Choose a conversion type.</div>
+      </article>
+
+      <article class="panel hidden" data-tool="notes">
+        <h2>Quick Notes</h2>
+        <textarea id="notesInput" rows="8" placeholder="Write your notes here..."></textarea>
+        <div class="row">
+          <button id="saveNotes">Save Notes</button>
+          <button id="clearNotes" class="danger">Clear Notes</button>
+        </div>
+        <div class="result" id="notesStatus">Notes are stored locally in your browser.</div>
+      </article>
+
+      <article class="panel hidden" data-tool="todo">
+        <h2>To-Do List</h2>
+        <div class="row">
+          <input id="todoInput" placeholder="Add a task" />
+          <button id="todoAdd">Add Task</button>
+        </div>
+        <div id="todoList"></div>
+      </article>
+
+      <article class="panel hidden" data-tool="timer">
+        <h2>Simple Timer</h2>
+        <div class="row">
+          <input id="timerMinutes" type="number" min="1" value="5" />
+          <button id="timerStart">Start</button>
+        </div>
+        <div class="clock" id="timerDisplay">00:00</div>
+        <div class="row">
+          <button id="timerPause" class="secondary">Pause</button>
+          <button id="timerReset" class="danger">Reset</button>
+        </div>
+      </article>
+    </section>
+
+    <footer>Built as a single-file utility dashboard.</footer>
+  </main>
+
+  <script>
+    const tools = [
+      ["calculator", "Calculator"],
+      ["converter", "Converter"],
+      ["notes", "Notes"],
+      ["todo", "To-Do"],
+      ["timer", "Timer"]
+    ];
+
+    const tabs = document.getElementById("tabs");
+    const panels = [...document.querySelectorAll("[data-tool]")];
+
+    function showTool(name) {
+      panels.forEach((p) => p.classList.toggle("hidden", p.dataset.tool !== name));
+      [...tabs.children].forEach((b) => b.classList.toggle("active", b.dataset.tool === name));
+    }
+
+    tools.forEach(([key, label], index) => {
+      const b = document.createElement("button");
+      b.className = "tab";
+      if (index === 0) b.classList.add("active");
+      b.dataset.tool = key;
+      b.textContent = label;
+      b.onclick = () => showTool(key);
+      tabs.appendChild(b);
+    });
+
+    // Date header
+    document.getElementById("dateNow").textContent = new Date().toLocaleString();
+
+    // Calculator
+    document.getElementById("calcBtn").onclick = () => {
+      const expr = document.getElementById("calcExpr").value.trim();
+      const out = document.getElementById("calcResult");
+      if (!expr) return (out.textContent = "Please enter an expression.");
+      if (!/^[0-9+\-*/().\s]+$/.test(expr)) return (out.textContent = "Only numbers/operators are allowed.");
+      try {
+        const result = Function(`"use strict"; return (${expr})`)();
+        out.textContent = `${expr} = ${result}`;
+      } catch {
+        out.textContent = "Invalid expression.";
+      }
+    };
+
+    // Converter
+    document.getElementById("convBtn").onclick = () => {
+      const val = Number(document.getElementById("convInput").value);
+      const type = document.getElementById("convType").value;
+      const out = document.getElementById("convResult");
+      if (Number.isNaN(val)) return (out.textContent = "Enter a valid number.");
+      let converted;
+      switch (type) {
+        case "km-mi":
+          converted = `${(val * 0.621371).toFixed(3)} mi`;
+          break;
+        case "mi-km":
+          converted = `${(val / 0.621371).toFixed(3)} km`;
+          break;
+        case "c-f":
+          converted = `${((val * 9) / 5 + 32).toFixed(2)} °F`;
+          break;
+        case "f-c":
+          converted = `${(((val - 32) * 5) / 9).toFixed(2)} °C`;
+          break;
+      }
+      out.textContent = `${val} → ${converted}`;
+    };
+
+    // Notes
+    const notesInput = document.getElementById("notesInput");
+    const notesStatus = document.getElementById("notesStatus");
+    notesInput.value = localStorage.getItem("aio_notes") || "";
+
+    document.getElementById("saveNotes").onclick = () => {
+      localStorage.setItem("aio_notes", notesInput.value);
+      notesStatus.textContent = "Notes saved.";
+    };
+
+    document.getElementById("clearNotes").onclick = () => {
+      notesInput.value = "";
+      localStorage.removeItem("aio_notes");
+      notesStatus.textContent = "Notes cleared.";
+    };
+
+    // Todo
+    const todoInput = document.getElementById("todoInput");
+    const todoList = document.getElementById("todoList");
+    let todos = JSON.parse(localStorage.getItem("aio_todos") || "[]");
+
+    function saveTodos() {
+      localStorage.setItem("aio_todos", JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = "";
+      if (!todos.length) {
+        todoList.innerHTML = '<div class="result">No tasks yet.</div>';
+        return;
+      }
+      todos.forEach((todo, idx) => {
+        const row = document.createElement("div");
+        row.className = `todo-item ${todo.done ? "done" : ""}`;
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = todo.done;
+        check.style.width = "auto";
+        check.onchange = () => {
+          todo.done = check.checked;
+          saveTodos();
+          renderTodos();
+        };
+
+        const txt = document.createElement("span");
+        txt.textContent = todo.text;
+
+        const del = document.createElement("button");
+        del.textContent = "Delete";
+        del.className = "danger";
+        del.style.width = "auto";
+        del.onclick = () => {
+          todos.splice(idx, 1);
+          saveTodos();
+          renderTodos();
+        };
+
+        row.append(check, txt, del);
+        todoList.appendChild(row);
+      });
+    }
+
+    document.getElementById("todoAdd").onclick = () => {
+      const text = todoInput.value.trim();
+      if (!text) return;
+      todos.push({ text, done: false });
+      todoInput.value = "";
+      saveTodos();
+      renderTodos();
+    };
+
+    renderTodos();
+
+    // Timer
+    let remaining = 0;
+    let timerHandle = null;
+
+    function formatTime(seconds) {
+      const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const s = String(seconds % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function refreshTimer() {
+      document.getElementById("timerDisplay").textContent = formatTime(remaining);
+    }
+
+    document.getElementById("timerStart").onclick = () => {
+      if (!remaining) {
+        const mins = Number(document.getElementById("timerMinutes").value) || 0;
+        if (mins <= 0) return;
+        remaining = Math.floor(mins * 60);
+      }
+      if (timerHandle) return;
+      timerHandle = setInterval(() => {
+        if (remaining > 0) {
+          remaining--;
+          refreshTimer();
+        } else {
+          clearInterval(timerHandle);
+          timerHandle = null;
+          alert("Timer complete!");
+        }
+      }, 1000);
+      refreshTimer();
+    };
+
+    document.getElementById("timerPause").onclick = () => {
+      clearInterval(timerHandle);
+      timerHandle = null;
+    };
+
+    document.getElementById("timerReset").onclick = () => {
+      clearInterval(timerHandle);
+      timerHandle = null;
+      remaining = 0;
+      refreshTimer();
+    };
+
+    refreshTimer();
+  </script>
+</body>
+</html>
